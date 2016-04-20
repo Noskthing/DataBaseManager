@@ -29,6 +29,7 @@
     if (self = [super init])
     {
         _dataBase = [FMDatabase databaseWithPath:[self dataBasePath]];
+        NSLog(@"%@",[self dataBasePath]);
         _dataBaseOpenFailureError = [[NSError alloc] initWithDomain:@"数据库打开失败" code:-1000 userInfo:nil];
         _dataBaseExecuteSqlFailureError = [[NSError alloc] initWithDomain:@"sql语句执行失败" code:-1002 userInfo:nil];
     }
@@ -90,11 +91,11 @@
     
     NSArray * properties = [self propertiesFromObject:object];
     
-    for (int i = 1; i <= properties.count; i++)
+    for (int i = 0; i < properties.count; i++)
     {
         id value = [object valueForKey:properties[i]];
         
-        if (i == properties.count)
+        if (i == properties.count - 1)
         {
             [sql appendFormat:@"%@ )",properties[i]];
             [values appendFormat:@"'%@' )",value];
@@ -173,7 +174,7 @@
 }
 
 #pragma mark     删除表中某一个对象
--(void)deleteObjectFromTableWithObject:(id)object andPropertyString:(NSString *)property failure:(ExecuteSqlErrorBlock)block
+-(void)deleteObjectFromTableWithObject:(id)object PropertyString:(NSString *)propertyString andProperty:(NSString *)property failure:(ExecuteSqlErrorBlock)block
 {
     if (![_dataBase open])
     {
@@ -181,7 +182,7 @@
         return;
     }
     
-    NSString * sql = [NSString stringWithFormat:@"delete from %@ where name = '%@'",NSStringFromClass([object class]),property];
+    NSString * sql = [NSString stringWithFormat:@"delete from %@ where %@ = '%@'",NSStringFromClass([object class]),propertyString,property];
     
     if (![_dataBase executeUpdate:sql])
     {
@@ -210,11 +211,12 @@
         return;
     }
     
-    NSString * sql = [NSString stringWithFormat:@"select * from %@ where %@ = %@",NSStringFromClass([obj class]),property,value];
+    NSString * sql = [NSString stringWithFormat:@"select * from %@ where %@ = '%@'",NSStringFromClass([obj class]),property,value];
     
-    if ([_dataBase executeQuery:sql])
+    if (![_dataBase executeQuery:sql])
     {
         failureBlock(_dataBaseExecuteSqlFailureError);
+        NSLog(@"sql is %@",sql);
         [_dataBase close];
         return;
     }
@@ -251,7 +253,7 @@
 #pragma mark    判断某类对象的表是否存在
 -(BOOL)isExistTableInDataBaseWithTableName:(NSString *)objName
 {
-    NSString * sql = [NSString stringWithFormat:@"select name from sqlite_master where type = 'table' and name = %@",objName];
+    NSString * sql = [NSString stringWithFormat:@"select name from sqlite_master where type = 'table' and name = '%@'",objName];
     
     FMResultSet * result = [_dataBase executeQuery:sql];
     
