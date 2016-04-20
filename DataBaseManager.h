@@ -23,9 +23,9 @@ typedef void(^ExecuteSqlSuccessBlock)(id result);
 /** 根据类名查询 并取出所有对象 */
 -(void)queryAllObjectFromDataBaseWithObject:(id)obj success:(ExecuteSqlSuccessBlock)successBlock failure:(ExecuteSqlErrorBlock)failureBlock;
 /** 根据类名查询 获取某个对象 查询某个属性是否存在 */
--(void)existsPropertyOfObjectInDataBaseFromObject:(id)obj withPropertyString:(NSString *)property andPropretyOfObect:(NSString *)value success:(ExecuteSqlSuccessBlock)successBlock failure:(ExecuteSqlErrorBlock)failureBlock;
+-(void)existsPropertyOfObjectInDataBaseFromObject:(id)obj withPropertyName:(NSString *)property andPropretyValue:(NSString *)value success:(ExecuteSqlSuccessBlock)successBlock failure:(ExecuteSqlErrorBlock)failureBlock;
 /** 删除某个对象的表 */
 - (void)deleteAllObjectInDatabaseWithObject:(id)object failure:(ExecuteSqlErrorBlock)block;
 /** 删除表中某一个对象 */
--(void)deleteObjectFromTableWithObject:(id)object PropertyString:(NSString *)propertyString andProperty:(NSString *)property failure:(ExecuteSqlErrorBlock)block;
+-(void)deleteObjectFromTableWithObject:(id)object PropertyName:(NSString *)name andPropertyValue:(NSString *)value failure:(ExecuteSqlErrorBlock)block;
 @end

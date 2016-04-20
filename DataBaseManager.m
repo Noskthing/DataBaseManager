@@ -29,7 +29,7 @@
     if (self = [super init])
     {
         _dataBase = [FMDatabase databaseWithPath:[self dataBasePath]];
-        NSLog(@"%@",[self dataBasePath]);
+//        NSLog(@"%@",[self dataBasePath]);
         _dataBaseOpenFailureError = [[NSError alloc] initWithDomain:@"数据库打开失败" code:-1000 userInfo:nil];
         _dataBaseExecuteSqlFailureError = [[NSError alloc] initWithDomain:@"sql语句执行失败" code:-1002 userInfo:nil];
     }
@@ -174,7 +174,7 @@
 }
 
 #pragma mark     删除表中某一个对象
--(void)deleteObjectFromTableWithObject:(id)object PropertyString:(NSString *)propertyString andProperty:(NSString *)property failure:(ExecuteSqlErrorBlock)block
+-(void)deleteObjectFromTableWithObject:(id)object PropertyName:(NSString *)name andPropertyValue:(NSString *)value failure:(ExecuteSqlErrorBlock)block
 {
     if (![_dataBase open])
     {
@@ -182,7 +182,7 @@
         return;
     }
     
-    NSString * sql = [NSString stringWithFormat:@"delete from %@ where %@ = '%@'",NSStringFromClass([object class]),propertyString,property];
+    NSString * sql = [NSString stringWithFormat:@"delete from %@ where %@ = '%@'",NSStringFromClass([object class]),name,value];
     
     if (![_dataBase executeUpdate:sql])
     {
@@ -195,7 +195,7 @@
 }
 
 #pragma mark    根据类名查询 获取某个对象 查询某个属性是否存在
--(void)existsPropertyOfObjectInDataBaseFromObject:(id)obj withPropertyString:(NSString *)property andPropretyOfObect:(NSString *)value success:(ExecuteSqlSuccessBlock)successBlock failure:(ExecuteSqlErrorBlock)failureBlock
+-(void)existsPropertyOfObjectInDataBaseFromObject:(id)obj withPropertyName:(NSString *)property andPropretyValue:(NSString *)value success:(ExecuteSqlSuccessBlock)successBlock failure:(ExecuteSqlErrorBlock)failureBlock
 {
     if (![_dataBase open])
     {
@@ -216,7 +216,6 @@
     if (![_dataBase executeQuery:sql])
     {
         failureBlock(_dataBaseExecuteSqlFailureError);
-        NSLog(@"sql is %@",sql);
         [_dataBase close];
         return;
     }
