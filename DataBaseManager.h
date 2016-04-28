@@ -28,4 +28,6 @@ typedef void(^ExecuteSqlSuccessBlock)(id result);
 - (void)deleteAllObjectInDatabaseWithObject:(id)object failure:(ExecuteSqlErrorBlock)block;
 /** 删除表中某一个对象 */
 -(void)deleteObjectFromTableWithObject:(id)object PropertyName:(NSString *)name andPropertyValue:(NSString *)value failure:(ExecuteSqlErrorBlock)block;
+
+
 @end

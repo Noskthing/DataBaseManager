@@ -112,7 +112,6 @@
     //执行操作
     if(![_dataBase executeUpdate:sql])
     {
-        
         block(_dataBaseExecuteSqlFailureError);
         [_dataBase close];
         return;
