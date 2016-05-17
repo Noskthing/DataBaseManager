@@ -22,7 +22,6 @@
 
 @implementation DataBaseManager
 
-
 #pragma mark    初始化方法
 -(instancetype)init
 {
@@ -120,6 +119,34 @@
     [_dataBase close];
 }
 
+#pragma mark      查询表的行数
+-(void)queryCountFromTableWithObject:(id)object success:(ExecuteSqlSuccessBlock)successBlock failure:(ExecuteSqlErrorBlock)failureBlock
+{
+    //判断打开数据库是否成功
+    if (![_dataBase open])
+    {
+        failureBlock(_dataBaseOpenFailureError);
+        [_dataBase close];
+        return;
+    }
+    
+    NSString * sql = [NSString stringWithFormat:@"select count(*) from %@",NSStringFromClass([object class])];
+    
+    FMResultSet * results = [_dataBase executeQuery:sql];
+    
+    if ([results next])
+    {
+        int totalCount = [results intForColumnIndex:0];
+        successBlock(@(totalCount));
+    }
+    else
+    {
+        failureBlock(_dataBaseExecuteSqlFailureError);
+    }
+    
+    [_dataBase close];
+}
+
 #pragma mark      根据类名查询 并取出所有对象
 -(void)queryAllObjectFromDataBaseWithObject:(id)obj success:(ExecuteSqlSuccessBlock)successBlock failure:(ExecuteSqlErrorBlock)failureBlock
 {
@@ -132,6 +159,19 @@
     }
     
     NSString * obejctName = NSStringFromClass([obj class]);
+    
+    //判断表是否存在
+    if (![self isExistTableInDataBaseWithTableName:obejctName])
+    {
+        //不存在 创建该表
+        if (![self createTabelInDataBaseWithObject:obj])
+        {
+            NSError * error = [[NSError alloc] initWithDomain:@"创建表失败" code:-1001 userInfo:nil];
+            failureBlock(error);
+            [_dataBase close];
+            return;
+        }
+    }
     
     //拼接sql语句
     NSString * sql = [NSString stringWithFormat:@"select * from %@",obejctName];
@@ -221,6 +261,36 @@
     
     FMResultSet * results = [_dataBase executeQuery:sql];
     successBlock([self modelsFromFMResultSet:results Object:obj]);
+}
+
+#pragma mark     获取指定行数的数据    
+-(void)queryObjectsFromTable:(id)object begin:(NSInteger)beginRow end:(NSInteger)endRow success:(ExecuteSqlSuccessBlock)successBlock failure:(ExecuteSqlErrorBlock)failureBlock
+{
+    if (![_dataBase open])
+    {
+        failureBlock(_dataBaseOpenFailureError);
+        return;
+    }
+    
+    if(![self isExistTableInDataBaseWithTableName:NSStringFromClass([object class])])
+    {
+        NSError * error = [[NSError alloc] initWithDomain:@"表不存在" code:-1004 userInfo:nil];
+        failureBlock(error);
+        [_dataBase close];
+        return;
+    }
+    
+    NSString * sql = [NSString stringWithFormat:@"select * from %@ limit %ld offset %ld",NSStringFromClass([object class]),endRow - beginRow,beginRow];
+    
+    if (![_dataBase executeQuery:sql])
+    {
+        failureBlock(_dataBaseExecuteSqlFailureError);
+        [_dataBase close];
+        return;
+    }
+    
+    FMResultSet * results = [_dataBase executeQuery:sql];
+    successBlock([self modelsFromFMResultSet:results Object:object]);
 }
 
 #pragma mark      通用方法
